@@ -19,5 +19,11 @@ const getLoginPage=(req,res) => {
     link:'login',
   });
 }
-export{getIndexPage,getAboutPage,getRegisterPage,getLoginPage}  
+const getLogoutPage=(req,res) => {
+  res.cookie("jwt","",{
+    maxAge:1,
+  });
+  res.redirect("/");
+}
+export{getIndexPage,getAboutPage,getRegisterPage,getLoginPage,getLogoutPage}  
 // ! farklı dosyalarda çağırmak için export etmemiz gerekiyor. Burada obje olarak export ettik

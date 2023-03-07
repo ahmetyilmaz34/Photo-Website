@@ -6,6 +6,7 @@ import pageRoute from "./routes/pageRoute.js"
 //  router değişkenini default olarak export ettiğimiz için direkt böyle import edebildik.
 import photoRoute from "./routes/photoRoute.js";
 import userRoute from "./routes/userRoute.js";
+import {checkUser} from "./middlewares/authMiddleware.js";
 
 dotenv.config(); //  .env içerisinde oluşturduğumuz değişkenlere ulaşabiliriz.
 
@@ -27,30 +28,11 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 // * routes
+app.get("*",checkUser)
 app.use("/",pageRoute);
 app.use("/about",pageRoute);
 app.use('/photos',photoRoute);
 app.use('/users',userRoute);
-
-
-
-/* app.get('/', (req, res) => {
-    //  res.send("İndex sayfası"); Yazı yazdırdık
-    res.render('index');
-})
-app.get('/index', (req, res) => {
-    res.render('index');
-})
-app.get('/about', (req, res) => {
-    res.render('about');
-})
-*/
-
-
-
-
-
-
 
 
 app.listen(port, () => {
