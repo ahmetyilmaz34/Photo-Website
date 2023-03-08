@@ -62,10 +62,11 @@
                      <% for (photo of photos) { %>
                         <div class="col-lg-4 col-md-6 ma_bottom30">
                            <div class="lightbox">
-                              <img src="images/g1.jpg" alt="Bridge">
+                              <img src="<%= photo.url %>" alt="<%= photo.name %>">
                               <div class="view_main">
                                  <div class="pose">
-                                    <a class="read_more" href="/photos/<%= photo._id %>"><img src="images/ga.png" alt="#" /></a>
+                                    <a class="read_more" href="/photos/<%= photo._id %>"><img src="/images/ga.png"
+                                          alt="#" /></a>
                                     <h3 style="padding-top:10px ; padding-bottom: 10px;">
                                        <%= photo.name %>
                                     </h3>
@@ -88,8 +89,7 @@
          </div>
 
 
-         <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-            aria-hidden="true">
+         <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                <div class="modal-content">
                   <div class="modal-header">

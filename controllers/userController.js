@@ -75,7 +75,7 @@ const getDashboardPage = async (req, res) => {
     const photos = await Photo.find({user:res.locals.user._id});
     res.render("dashboard", {
         link: 'dashboard',
-        photos
+        photos,
     });
 }
 
