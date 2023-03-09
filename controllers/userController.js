@@ -77,6 +77,7 @@ const getDashboardPage = async (req, res) => {
     res.render("dashboard", {
         link: 'dashboard',
         photos,
+        user,
     });
 }
 
@@ -97,66 +98,88 @@ const getAllUsers = async (req, res) => {
 };
 const getAUser = async (req, res) => {
     try {
-        const user = await User.findById({ _id: req.params.id });
-        const photos = await Photo.find({ user: user._id });
-        res.status(200).render('user', {
-            user,
-            photos,
-            link: 'users',
-        });
-
+      const user = await User.findById({ _id: req.params.id });
+  
+      const inFollowers = user.followers.some((follower) => {
+        return follower.equals(res.locals.user._id);
+      });
+  
+      const photos = await Photo.find({ user: user._id });
+      res.status(200).render('user', {
+        user,
+        photos,
+        link: 'users',
+        inFollowers,
+      });
     } catch (error) {
-        res.status(500).json({
-            succeded: false,
-            error,
-        });
+      res.status(500).json({
+        succeded: false,
+        error,
+      });
     }
-};
-const follow = async (req, res) => {
+  };
+  
+  const follow = async (req, res) => {
+    // res.locals.user._id
     try {
-        let user = await User.findByIdAndUpdate(
-            { _id: req.params.id, },
-            { $push: { followers: res.locals.users._id } },
-            { new: true }//yeni oluşturulan userı dön dedik.
-        )
-        user = await User.findByIdAndUpdate(
-            { _id: res.locals.users._id, },
-            { $push: { following: req.params.id } },
-            { new: true }
-        )
-        res.status(200).json({
-            succeded: true,
-            user,
-        })
+      let user = await User.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          $push: { followers: res.locals.user._id },
+        },
+        { new: true }
+      );
+  
+      user = await User.findByIdAndUpdate(
+        { _id: res.locals.user._id },
+        {
+          $push: { followings: req.params.id },
+        },
+        { new: true }
+      );
+  
+      res.status(200).redirect(`/users/${req.params.id}`);
     } catch (error) {
-        res.status(500).json({
-            succeded: false,
-            error,
-        });
+      res.status(500).json({
+        succeded: false,
+        error,
+      });
     }
-};
-
-const unfollow = async (req, res) => {
+  };
+  
+  const unfollow = async (req, res) => {
+    // res.locals.user._id
     try {
-        let user = await User.findByIdAndUpdate(
-            { _id: req.params.id, },
-            { $pull: { followers: res.locals.users._id } },
-            { new: true }//yeni oluşturulan userı dön dedik.
-        )
-        user = await User.findByIdAndUpdate(
-            { _id: res.locals.users._id, },
-            { $pull: { following: req.params.id } },
-            { new: true }
-        )
-        res.status(200).json({
-            succeded: true,
-            user,
-        })
+      let user = await User.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          $pull: { followers: res.locals.user._id },
+        },
+        { new: true }
+      );
+  
+      user = await User.findByIdAndUpdate(
+        { _id: res.locals.user._id },
+        {
+          $pull: { followings: req.params.id },
+        },
+        { new: true }
+      );
+  
+      res.status(200).redirect(`/users/${req.params.id}`);
     } catch (error) {
-        res.status(500).json({
-            succeded: false,
-            error,
-        });
+      res.status(500).json({
+        succeded: false,
+        error,
+      });
     }
-};
-export { createUser, loginUser, getDashboardPage, getAllUsers, getAUser, follow, unfollow};
+  };
+  export {
+    createUser,
+    loginUser,
+    getDashboardPage,
+    getAllUsers,
+    getAUser,
+    follow,
+    unfollow,
+  };
