@@ -7,23 +7,23 @@ const createUser = async (req, res) => {
     try {
 
         const user = await User.create(req.body);
-        res.status(201).json({user: user._id});
+        res.status(201).json({ user: user._id });
     } catch (error) {
 
         let errors2 = {}
 
 
-        if(error.code === 11000){
-            errors2.email= "The email is already in registered";
+        if (error.code === 11000) {
+            errors2.email = "The email is already in registered";
         }
 
         if (error.name === "ValidationError") {
             Object.keys(error.errors).forEach((key) => {
-                errors2[key]= error.errors[key].message;
+                errors2[key] = error.errors[key].message;
             });
         }
 
-    
+
         res.status(400).json(errors2);
     }
 };
@@ -72,13 +72,91 @@ const createToken = (userId) => {
     });
 }
 const getDashboardPage = async (req, res) => {
-    const photos = await Photo.find({user:res.locals.user._id});
+    const photos = await Photo.find({ user: res.locals.user._id });
+    const user = await User.findById({ _id: res.locals.user._id }).populate(["followings", "followers"]);
     res.render("dashboard", {
         link: 'dashboard',
         photos,
     });
 }
 
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({ _id: { $ne: res.locals.user._id } });
+        res.status(200).render('users', {
+            users,
+            link: 'users',
+        });
 
+    } catch (error) {
+        res.status(500).json({
+            succeded: false,
+            error,
+        });
+    }
+};
+const getAUser = async (req, res) => {
+    try {
+        const user = await User.findById({ _id: req.params.id });
+        const photos = await Photo.find({ user: user._id });
+        res.status(200).render('user', {
+            user,
+            photos,
+            link: 'users',
+        });
 
-export { createUser, loginUser, getDashboardPage };
+    } catch (error) {
+        res.status(500).json({
+            succeded: false,
+            error,
+        });
+    }
+};
+const follow = async (req, res) => {
+    try {
+        let user = await User.findByIdAndUpdate(
+            { _id: req.params.id, },
+            { $push: { followers: res.locals.users._id } },
+            { new: true }//yeni oluşturulan userı dön dedik.
+        )
+        user = await User.findByIdAndUpdate(
+            { _id: res.locals.users._id, },
+            { $push: { following: req.params.id } },
+            { new: true }
+        )
+        res.status(200).json({
+            succeded: true,
+            user,
+        })
+    } catch (error) {
+        res.status(500).json({
+            succeded: false,
+            error,
+        });
+    }
+};
+
+const unfollow = async (req, res) => {
+    try {
+        let user = await User.findByIdAndUpdate(
+            { _id: req.params.id, },
+            { $pull: { followers: res.locals.users._id } },
+            { new: true }//yeni oluşturulan userı dön dedik.
+        )
+        user = await User.findByIdAndUpdate(
+            { _id: res.locals.users._id, },
+            { $pull: { following: req.params.id } },
+            { new: true }
+        )
+        res.status(200).json({
+            succeded: true,
+            user,
+        })
+    } catch (error) {
+        res.status(500).json({
+            succeded: false,
+            error,
+        });
+    }
+};
+export { createUser, loginUser, getDashboardPage, getAllUsers, getAUser, follow, unfollow};
